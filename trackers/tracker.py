@@ -21,12 +21,17 @@ class Tracker:
         
         for detection in detections:
             
-            class_names = detection.names
+            class_names = detection[0].names
             class_names_inv = {v:k for v, k in class_names.items()}
             
             # Convert into supervision detection format
             detection_sv = sv.Detections.from_ultralytics(detection[0])
-
+            
+            # Convert into Goalkeeper from Player
+            for object_id, class_id in enumerate(detection_sv[0].class_id):
+                if class_names[class_id] == 'goalkeeper':
+                    detection_sv[0].class_id[object_id] = class_names_inv['player']
+            
             # Track Objects
             detection_with_tracks = self.tracker.update_with_detections(detection_sv)
             
